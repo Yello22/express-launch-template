@@ -18,11 +18,13 @@ const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
 
-
 // Start express app
 const app = express();
 
-app.enable("trust proxy");
+app.set("trust proxy", (ip) => {
+  if (ip === "127.0.0.1" || ip === "::ffff:172.24.0.5") return true;
+  else return false;
+});
 
 // 1) GLOBAL MIDDLEWARES
 // Implement CORS
@@ -88,7 +90,7 @@ app.use((req, res, next) => {
   next();
 });
 
-//REDIS 
+//REDIS
 let redisClient = redis.createClient({
   host: config.REDIS_URL,
   port: config.REDIS_PORT,
