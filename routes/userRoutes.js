@@ -24,15 +24,15 @@ router.patch(
 );
 router.delete('/deleteMe', userController.deleteMe);
 
-router.use(authController.checkPolicy);
-
 router
   .route('/')
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+  .all(authController.checkPolicy)
+  .get(authController.checkPolicy, userController.getAllUsers)
+  .post(authController.checkPolicy, userController.createUser);
 
 router
   .route('/:id')
+  .all(authController.checkPolicy)
   .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);

@@ -175,24 +175,21 @@ function getRessoucesRoute(endpoint) {
 }
 
 exports.checkPolicy = catchAsync(async (req, res, next) => {
-  const { roles } = req.user;
-  const asset = getRessoucesRoute(req.baseUrl);
+  const { user } = req
+  const { id } = req.params
+  let obj = getRessoucesRoute(req.baseUrl);
+  if (id && user.roles.includes("role:owner") && !user.roles.includes("role:admin")) obj = id
   const action = req.method;
   const e = await newEnforcer();
+  console.log(String(user._id), action, obj)
+  const can = await e.enforce(String(user._id), action, obj);
 
-  const allowed = await roles.reduce(async (perms, role) => {
-    const acc = await perms;
-    if (acc) return true;
-    const can = await e.enforce(role, asset, action);
-    if (can) return true;
-  }, false);
-
-  allowed
+  can
     ? next()
     : res
-        .status(403)
-        .send('Forbidden')
-        .end();
+      .status(403)
+      .send('Not authorized')
+      .end();
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
