@@ -166,23 +166,11 @@ exports.restrictTo = (...roles) => {
   };
 };
 
-function getRessoucesRoute(endpoint) {
-  const pathWithoutQuery = endpoint.split('?')[0];
-  const pathParts = pathWithoutQuery.split('/');
-  const filteredParts = pathParts.filter(part => part !== '');
-  const thirdWord = filteredParts[2];
-  return thirdWord;
-}
-
 exports.checkPolicy = catchAsync(async (req, res, next) => {
   const { user } = req
-  const { id } = req.params
-  let obj = getRessoucesRoute(req.baseUrl);
-  if (id && user.roles.includes("role:owner") && !user.roles.includes("role:admin")) obj = id
   const action = req.method;
   const e = await newEnforcer();
-  console.log(String(user._id), action, obj)
-  const can = await e.enforce(String(user._id), action, obj);
+  const can = await e.enforce(String(user._id), req.originalUrl, action);
 
   can
     ? next()
