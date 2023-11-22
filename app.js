@@ -12,7 +12,7 @@ const cors = require('cors');
 const session = require('express-session');
 const redis = require('redis');
 let RedisStore = require('connect-redis')(session);
-const config = require('./config');
+const config = require('./config/globalConfig');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');

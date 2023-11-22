@@ -1,7 +1,7 @@
 const path = require('path');
 const { newEnforcer } = require('casbin');
 const { MongooseAdapter } = require('casbin-mongoose-adapter');
-const config = require('../config');
+const config = require('../config/globalConfig');
 const { RedisWatcher } = require('@casbin/redis-watcher');
 
 exports.newEnforcer = async () => {
