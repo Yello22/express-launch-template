@@ -14,10 +14,18 @@ services:
       - MONGO_PASSWORD=mypassword
       - SESSION_SECRET=mYsEcret
     command: npm run dev
+
   percona-mongo:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=steven
       - MONGO_INITDB_ROOT_PASSWORD=mypassword
+
+  percona-mysql-db:
+    environment:
+      MYSQL_ROOT_PASSWORD: beta/svp*.Mysql123
+      MYSQL_DATABASE: foodly
+    ports:
+      - "4406:3306"
 
   nginx:
     ports:

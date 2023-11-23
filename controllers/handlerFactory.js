@@ -1,14 +1,18 @@
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
-const APIFeatures = require("./../utils/apiFeatures");
+const APIFeatures = require("./../utils/sqlApiFeatures");
 
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+
+    const doc = await Model.findByPk(id);
 
     if (!doc) {
       return next(new AppError("No document found with that ID", 404));
     }
+
+    await Model.destroy({ where: { id } });
 
     res.status(204).json({
       status: "success",
@@ -18,26 +22,33 @@ exports.deleteOne = (Model) =>
 
 exports.updateOne = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const { id } = req.params;
+    const { body } = req;
+
+    const doc = await Model.findByPk(id);
 
     if (!doc) {
       return next(new AppError("No document found with that ID", 404));
     }
 
+    await doc.update(body, { where: { id } });
+
+    const updatedDoc = await Model.findByPk(id);
+
     res.status(200).json({
       status: "success",
       data: {
-        data: doc,
+        data: updatedDoc,
       },
     });
   });
 
+
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.create(req.body);
+    const { body } = req;
+
+    const doc = await Model.create(body);
 
     res.status(201).json({
       status: "success",
@@ -47,20 +58,24 @@ exports.createOne = (Model) =>
     });
   });
 
-exports.getOne = (Model, popOptions) =>
+exports.getOne = (Model, includeOptions) =>
   catchAsync(async (req, res, next) => {
-    let query = Model.findById(req.params.id);
-    if (popOptions) query = query.populate(popOptions);
-    const doc = await query;
+    const { id } = req.params;
 
-    if (!doc) {
+    let query = await Model.findByPk(id);
+
+    if (!query) {
       return next(new AppError("No document found with that ID", 404));
+    }
+
+    if (includeOptions) {
+      query = await Model.findByPk(id, { include: includeOptions });
     }
 
     res.status(200).json({
       status: "success",
       data: {
-        data: doc,
+        data: query,
       },
     });
   });
