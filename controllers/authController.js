@@ -16,7 +16,6 @@ const signToken = id => {
 
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user.id);
-  console.log(token)
   res.cookie('jwt', token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
@@ -62,8 +61,8 @@ exports.login = catchAsync(async (req, res, next) => {
 
   try {
     // 2) Check if user exists && password is correct
-    const user = await User.findOne({ where: email });
 
+    const user = await User.findOne({ where: { email } });
     if (!user || !(await user.correctPassword(password, user.password))) {
       return next(new AppError('Incorrect email or password', 401));
     }
@@ -71,11 +70,10 @@ exports.login = catchAsync(async (req, res, next) => {
     // 3) If everything is okay, send token to client
     createSendToken(user, 200, req, res);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return next(new AppError('Error while logging in. Please try again.', 500));
   }
 });
-
 
 exports.logout = (req, res) => {
   res.cookie('jwt', 'loggedout', {
@@ -175,19 +173,18 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.checkPolicy = catchAsync(async (req, res, next) => {
-  const { user } = req
+  const { user } = req;
   const action = req.method;
   const e = await newEnforcer();
-  const can = await e.enforce(String(user._id), req.originalUrl, action);
+  const can = await e.enforce(String(user.id), req.originalUrl, action);
 
   can
     ? next()
     : res
-      .status(403)
-      .send('Not authorized')
-      .end();
+        .status(403)
+        .send('Not authorized')
+        .end();
 });
-
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
@@ -208,7 +205,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       'host'
     )}/api/v1/users/resetPassword/${resetToken}`;
 
-
     res.status(200).json({
       status: 'success',
       message: 'Token sent to email!',
@@ -219,12 +215,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validate: false });
 
     return next(
-      new AppError('There was an error sending the email. Please try again later.'),
+      new AppError(
+        'There was an error sending the email. Please try again later.'
+      ),
       500
     );
   }
 });
-
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
@@ -234,11 +231,10 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     .digest('hex');
 
   const user = await User.findOne({
-    where:
-    {
+    where: {
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() },
-    }
+    },
   });
 
   // 2) If token has not expired, and there is user, set the new password

@@ -23,7 +23,7 @@ services:
   percona-mysql-db:
     environment:
       MYSQL_ROOT_PASSWORD: beta/svp*.Mysql123
-      MYSQL_DATABASE: foodly
+      MYSQL_DATABASE: predica_db
     ports:
       - "4406:3306"
 

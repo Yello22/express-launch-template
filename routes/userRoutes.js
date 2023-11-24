@@ -26,13 +26,13 @@ router.delete('/deleteMe', userController.deleteMe);
 
 router
   .route('/')
-  .all(authController.checkPolicy)
-  .get(authController.checkPolicy, userController.getAllUsers)
-  .post(authController.checkPolicy, userController.createUser);
+  //.all(authController.checkPolicy)
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
 
 router
   .route('/:id')
-  .all(authController.checkPolicy)
+  //.all(authController.checkPolicy)
   .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);
