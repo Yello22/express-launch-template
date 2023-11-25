@@ -1,18 +1,16 @@
-'use-strict';
+'use strict';
 
-const generateId = () => {
-  import('nanoid')
-    .then(({ customAlphabet }) => {
-      const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
-      const length = 12;
-
-      const nanoid = customAlphabet(alphabet, length);
-
-      return nanoid();
-    })
-    .catch(error => {
-      console.log(error);
-    });
+const generateId = async () => {
+  try {
+    const { customAlphabet } = await import('nanoid');
+    const alphabet = '1234567890abcdefg';
+    const length = 24;
+    const nanoid = customAlphabet(alphabet, length);
+    return nanoid(24);
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error generating ID');
+  }
 };
 
 module.exports = generateId;

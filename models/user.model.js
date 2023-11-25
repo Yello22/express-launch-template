@@ -9,7 +9,6 @@ const User = sequelize.define(
   {
     id: {
       type: DataTypes.STRING,
-      defaultValue: generateId(),
       primaryKey: true,
       unique: true,
       allowNull: false,
@@ -40,12 +39,6 @@ const User = sequelize.define(
     photo: {
       type: DataTypes.STRING,
       defaultValue: 'default.jpg',
-    },
-    uuid: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
-      unique: true,
     },
     password: {
       type: DataTypes.STRING,
@@ -86,6 +79,9 @@ const User = sequelize.define(
   },
   {
     hooks: {
+      beforeValidate: async user => {
+        if (!user.id) user.id = await generateId();
+      },
       beforeCreate: async user => {
         if (user.changed('password')) {
           user.password = await bcrypt.hash(user.password, 12);
@@ -139,7 +135,7 @@ User.sync({ alter: true })
   .then(() => {
     console.log('Table user sync successfuly with de DB!');
   })
-  .catch(err => console.err(err));
+  .catch(err => console.error(err));
 
 /*(async () => {
     await sequelize.sync({ force: true }).catch(err => {
